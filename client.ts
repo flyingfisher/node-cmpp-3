@@ -38,11 +38,12 @@ class Client extends events.EventEmitter {
 
 	bindEvent(){
 		this.socket.on("deliver",(rst)=>{
-			if(rst.body.Registered_Delivery === 1){
-				this.emit("deliver",rst);
+			var body = <Body>rst.body;
+			if(body.Registered_Delivery === 1){
+				this.emit("deliver",body.Msg_Content["Msg_Id"],body.Msg_Content["Stat"]);
 			}
 			else{
-				this.emit("receive",rst);
+				this.emit("receive",body.Dest_terminal_Id,body.Msg_Content);
 			}
 		});
 
@@ -50,8 +51,8 @@ class Client extends events.EventEmitter {
 			this.emit("terminated");
 		});
 
-		this.socket.on("error",()=>{
-			this.emit("error");
+		this.socket.on("error",(err)=>{
+			this.emit("error", err);
 		});
 	}
 
@@ -65,7 +66,7 @@ class Client extends events.EventEmitter {
 
 		body.DestUsr_tl = mobileList.length;
 		body.Dest_terminal_Id = destBuffer;
-		var buf = new Buffer(content,"gbk");
+		var buf = new Buffer(content, "gbk");
 
 		if(buf.length > 140){
 			return this.sendLongSms(body,buf);
