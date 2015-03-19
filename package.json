@@ -1,6 +1,6 @@
 {
   "name": "node-cmpp-3",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "client.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/flyingfisher/node-cmpp-3.0.git"
+    "url": "https://github.com/flyingfisher/node-cmpp-3.git"
   },
   "devDependencies": {},
   "dependencies": {
