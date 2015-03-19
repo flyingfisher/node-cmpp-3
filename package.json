@@ -1,0 +1,22 @@
+{
+  "name": "node-cmpp-3",
+  "version": "1.0.1",
+  "description": "",
+  "main": "client.js",
+  "scripts": {
+    "test": "mocha *.spec.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flyingfisher/node-cmpp-3.0.git"
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "bluebird": "^2.9.14",
+    "iconv-lite": "^0.4.7",
+    "lodash": "^3.5.0",
+    "moment": "^2.9.0"
+  }
+}

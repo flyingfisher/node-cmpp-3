@@ -1,0 +1,7 @@
+/.idea
+/*.js
+!global.js
+/*.map
+/cmppClient.cs
+/node_modules
+/npm-debug.log
