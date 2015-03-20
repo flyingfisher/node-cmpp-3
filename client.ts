@@ -43,7 +43,7 @@ class Client extends events.EventEmitter {
 				this.emit("deliver",body.Msg_Content["Msg_Id"],body.Msg_Content["Stat"]);
 			}
 			else{
-				this.emit("receive",body.Dest_terminal_Id,body.Msg_Content);
+				this.emit("receive", body.Src_terminal_Id, body.Msg_Content);
 			}
 		});
 
