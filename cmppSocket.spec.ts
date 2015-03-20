@@ -6,11 +6,12 @@
 ///<reference path='typings/bluebird/bluebird.d.ts' />
 ///<reference path='typings/mocha/mocha.d.ts' />
 
+require("./global");
 import assert = require("assert");
 import Socket = require("./cmppSocket");
 
 describe("cmppSocket Test",()=>{
-    var socket = new Socket();
+    var socket = new Socket({});
     describe("writeBuf test",()=>{
         it("should write correct 8 bit int",()=>{
             var buffer = new Buffer(10);

@@ -119,14 +119,19 @@ class CMPPSocket extends events.EventEmitter{
             this.emit("terminated");
             clearTimeout(this.heartbeatHandle);
             this.isReady = false;
-            this.sendResponse(Commands.CMPP_TERMINATE_RESP,header.Sequence_Id);
+            this.sendResponse(Commands.CMPP_TERMINATE_RESP, header.Sequence_Id);
             Promise.delay(100).then(()=>{this.destroySocket();});
             return;
         }
 
         if(header.Command_Id === Commands.CMPP_DELIVER){
             this.emit("deliver", {header:header,body:body});
-            this.sendResponse(Commands.CMPP_DELIVER_RESP,header.Sequence_Id,{Msg_Id:body.Msg_Id,Result:0});
+            this.sendResponse(Commands.CMPP_DELIVER_RESP, header.Sequence_Id,{Msg_Id:body.Msg_Id,Result:0});
+            return;
+        }
+
+        if(header.Command_Id === Commands.CMPP_ACTIVE_TEST){
+            this.sendResponse(Commands.CMPP_ACTIVE_TEST_RESP, header.Sequence_Id);
             return;
         }
 
@@ -148,7 +153,7 @@ class CMPPSocket extends events.EventEmitter{
             return;
         }
 
-        this.emit("error",new Error("no handler found"), header);
+        this.emit("error",new Error("no handler found"), Commands[header.Command_Id] || header.Command_Id);
         return;
     }
 
@@ -226,7 +231,7 @@ class CMPPSocket extends events.EventEmitter{
         var commandDesp = CommandsDescription[commandStr];
         if (!commandDesp) return obj;
 
-        commandDesp.forEach((field)=>{
+        commandDesp.forEach((field:any)=>{
             obj[field.name]=this.getValue(buffer, field, obj);
         });
 

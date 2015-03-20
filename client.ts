@@ -51,8 +51,8 @@ class Client extends events.EventEmitter {
 			this.emit("terminated");
 		});
 
-		this.socket.on("error",(err)=>{
-			this.emit("error", err);
+		this.socket.on("error",(err, command)=>{
+			this.emit("error", err, command);
 		});
 	}
 
