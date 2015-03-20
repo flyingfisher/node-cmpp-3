@@ -1,7 +1,7 @@
 # node-cmpp-3.0
 This is an implementation for CMPP 3.0 protocol.
 
-Now the project is under testing, not stable.
+Now the project passed basic test. But it is not fully tested.
 
 This project is write in Typescript 1.4.
 
