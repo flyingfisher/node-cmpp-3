@@ -12,6 +12,8 @@ class Client extends events.EventEmitter {
 	private socket:Socket;
 	private Commands = Socket.Commands;
 	private spId;
+	contentLimit=70;
+	longSmsBufLimit=140;
 
 	public deliverConst = ReportStat;
 
@@ -67,24 +69,41 @@ class Client extends events.EventEmitter {
 
 		body.DestUsr_tl = mobileList.length;
 		body.Dest_terminal_Id = destBuffer;
-		var buf = new Buffer(content, "gbk");
 
-		if(buf.length > 140){
-			return this.sendLongSms(body,buf);
+		if(content.length > this.contentLimit){
+			return this.sendLongSms(body, content);
 		}
 
+		var buf = new Buffer(content, "gbk");
 		body.Msg_Length=buf.length;
 		body.Msg_Content=buf;
 		return this.socket.send(this.Commands.CMPP_SUBMIT, body);
 	}
 
-	private sendLongSms(body:Body, buf:Buffer):Promise<any>{
-		var splitCount = Math.ceil(buf.length / 140);
+	private sendLongSms(body:Body, content):Promise<any>{
+		var buf = new Buffer(content,"utf16");
+
+		var bufSliceCount = this.longSmsBufLimit - 8;
+
+		var splitCount = Math.ceil(buf.length / bufSliceCount);
+
+		var tp_udhiHead_buf = new Buffer(7);
+		tp_udhiHead_buf[0] = 6;
+		tp_udhiHead_buf[1] = 8;
+		tp_udhiHead_buf[2] = 4;
+		tp_udhiHead_buf[3] = _.random(127);
+		tp_udhiHead_buf[4] = _.random(127);
+
+		tp_udhiHead_buf[5] = splitCount;
+
 		var promiseList = [];
 		_.times(splitCount,(idx)=>{
+			tp_udhiHead_buf[6] = idx + 1;
+			body.TP_udhi = 1;
+			body.Msg_Fmt = 8;
 			body.Pk_total = splitCount;
-			body.Pk_number = idx+1;
-			body.Msg_Content = buf.slice(140*idx,140*(idx+1));
+			body.Pk_number = idx + 1;
+			body.Msg_Content = Buffer.concat([tp_udhiHead_buf, buf.slice(bufSliceCount*idx,bufSliceCount*(idx+1))]);
 			body.Msg_Length = body.Msg_Content["length"];
 			promiseList.push(this.socket.send(this.Commands.CMPP_SUBMIT, body));
 		});
