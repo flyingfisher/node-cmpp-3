@@ -60,6 +60,7 @@ class Client extends events.EventEmitter {
 		if(!this.socket.isReady) return Promise.reject("socket is not Ready");
 		var body = this.buildSubmitBody();
 		var destBuffer = new Buffer(mobileList.length * 32);
+		destBuffer.fill(0);
 		mobileList.forEach((mobile,index)=>{
 			destBuffer.write(mobile, index * 32, 32, "ascii");
 		});
