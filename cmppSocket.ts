@@ -125,8 +125,8 @@ class CMPPSocket extends events.EventEmitter{
         }
 
         if(header.Command_Id === Commands.CMPP_DELIVER){
-            this.emit("deliver", {header:header,body:body});
             this.sendResponse(Commands.CMPP_DELIVER_RESP, header.Sequence_Id,{Msg_Id:body.Msg_Id,Result:0});
+            this.emit("deliver", {header:header,body:body});
             return;
         }
 
