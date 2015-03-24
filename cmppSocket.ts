@@ -91,9 +91,11 @@ class CMPPSocket extends events.EventEmitter{
 
     private destroySocket(){
         this.isReady = false;
-        this.socket.end();
-        this.socket.destroy();
-        this.socket = undefined;
+        if(this.socket) {
+            this.socket.end();
+            this.socket.destroy();
+            this.socket = undefined;
+        }
     }
 
     handleData(buffer){
