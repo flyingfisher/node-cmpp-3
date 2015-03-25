@@ -145,7 +145,7 @@ class CMPPSocket extends events.EventEmitter{
             }
             clearTimeout(promise._timeoutHandle);
             if(this.hasError(body)){
-                var msg = `command:${Commands[header.Command_Id]} failed. result:${Errors[body.result]}`;
+                var msg = `command:${Commands[header.Command_Id]} failed. result:${Errors[body.Result]}`;
                 promise.reject(new Error(msg));
             }else{
                 promise.resolve({header:header,body:body});
