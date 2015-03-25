@@ -70,8 +70,8 @@ class CMPPSocket extends events.EventEmitter{
         });
         this.socket.on("error", (err)=> {
             this.emit("error", err);
-            this.destroySocket();
             deferred.reject(err);
+            this.destroySocket();
         });
         this.socket.on("connect", ()=> {
             deferred.resolve();
@@ -140,12 +140,13 @@ class CMPPSocket extends events.EventEmitter{
         if(this.isResponse(header.Command_Id)) {
             var promise = this.sequencePromiseMap[header.Sequence_Id];
             if (!promise){
-                this.emit("error",new Error("resp has no promise handle it"), header);
+                this.emit("error",new Error(Commands[header.Command_Id] + ": resp has no promise handle it"));
                 return;
             }
             clearTimeout(promise._timeoutHandle);
             if(this.hasError(body)){
-                promise.reject({header:header,body:body});
+                var msg = `command:${Commands[header.Command_Id]} failed. result:${Errors[body.result]}`;
+                promise.reject(new Error(msg));
             }else{
                 promise.resolve({header:header,body:body});
             }
@@ -155,7 +156,7 @@ class CMPPSocket extends events.EventEmitter{
             return;
         }
 
-        this.emit("error",new Error("no handler found"), Commands[header.Command_Id] || header.Command_Id);
+        this.emit("error",new Error(Commands[header.Command_Id]+": no handler found"));
         return;
     }
 
@@ -178,7 +179,8 @@ class CMPPSocket extends events.EventEmitter{
             if(command !== Commands.CMPP_ACTIVE_TEST) {
                 this.emit("timeout");
             }
-            deferred.reject({"timeout":true, command:Commands[command]});
+            var msg = `command:${Commands[command]} timeout.`;
+            deferred.reject(new Error(msg));
         },timeout);
 
         return deferred.promise;
@@ -340,6 +342,66 @@ enum Commands{
     CMPP_ACTIVE_TEST_RESP=0x80000008,
     CMPP_TERMINATE=0x00000002,
     CMPP_TERMINATE_RESP=0x80000002,
+}
+
+enum Errors{
+    消息结构错=1,
+    命令字错误=2,
+    消息序列号重复=3,
+    消息长度错=4,
+    资费代码错=5,
+    超过最大信息长=6,
+    业务代码错=7,
+    流量控制错=8,
+    本网关不负责此计费号码=9,
+    Src_ID错=10,
+    Msg_src错=11,
+    计费地址错=12,
+    目的地址错=13,
+    尚未建立连接=51,
+    尚未成功登录=52,
+    发送消息失败=53,
+    超时未接收到响应消息=54,
+    等待状态报告超时=55,
+    有效时间已经过期=61,
+    定时发送时间已经过期=62,
+    不能识别的FeeType=63,
+    发送服务源地址鉴权失败=64,
+    发送服务目的地址鉴权失败=65,
+    接收服务源地址鉴权失败=66,
+    接收服务目的地址鉴权失败=67,
+    用户鉴权失败=68,
+    此用户为黑名单用户=69,
+    网络断连或目的设备关闭接口=70,
+    超过最大节点数=71,
+    找不到路由=72,
+    等待应答超时=73,
+    送SCP失败=74,
+    送SCP鉴权等待应答超时=75,
+    信息安全鉴权失败=76,
+    超过最大Submit提交数=77,
+    SPID为空=78,
+    业务类型为空=79,
+    CPCode错误=80,
+    发送接收接口重复=81,
+    循环路由=82,
+    超过接收侧短消息MTU=83,
+    送DSMP重发失败=84,
+    DSMP系统忙重发=85,
+    DSMP系统忙且缓存满重发=86,
+    DSMP流控重发=87,
+    等DSMP应答超时重发=88,
+    非神州行预付费用户=202,
+    数据库操作失败=203,
+    移动用户帐户数据异常=206,
+    用户余额不足=208,
+    超过最高欠费额=210,
+    重复发送消息序列号msgid相同的计费请求消息=215,
+    SCP互联失败=218,
+    未登记的SP=222,
+    月消费超额=232,
+    未定义=241,
+    消息队列满=250
 }
 
 var CommandsDescription ={

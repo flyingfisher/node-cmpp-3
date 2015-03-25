@@ -53,13 +53,13 @@ class Client extends events.EventEmitter {
 			this.emit("terminated");
 		});
 
-		this.socket.on("error",(err, command)=>{
-			this.emit("error", err, command);
+		this.socket.on("error",(err)=>{
+			this.emit("error", err);
 		});
 	}
 
 	sendGroup(mobileList:string[],content):Promise<any>{
-		if(!this.socket.isReady) return Promise.reject("socket is not Ready");
+		if(!this.socket.isReady) return Promise.reject(new Error("socket is not Ready"));
 		var body = this.buildSubmitBody();
 		var destBuffer = new Buffer(mobileList.length * 32);
 		destBuffer.fill(0);

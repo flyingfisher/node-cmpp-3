@@ -14,8 +14,8 @@ client.on("deliver",(msgId,stat)=>{
     console.log("deliver",msgId,stat);
 });
 
-client.on("error",(err,command:string|number)=>{
-    console.log("error",err,command);
+client.on("error",(err)=>{
+    console.log("error",err);
 });
 
 client.on("terminated",()=>{
