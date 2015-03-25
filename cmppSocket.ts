@@ -138,9 +138,9 @@ class CMPPSocket extends events.EventEmitter{
         }
 
         if(this.isResponse(header.Command_Id)) {
-            var promise = this.sequencePromiseMap[header.Sequence_Id];
-            if (!promise){
-                this.emit("error",new Error(Commands[header.Command_Id] + ": resp has no promise handle it"));
+            var promise = this.popPromise(header.Sequence_Id);
+            if (!promise) {
+                this.emit("error", new Error(Commands[header.Command_Id] + ": resp has no promise handle it"));
                 return;
             }
             clearTimeout(promise._timeoutHandle);
@@ -150,8 +150,6 @@ class CMPPSocket extends events.EventEmitter{
             }else{
                 promise.resolve({header:header,body:body});
             }
-
-            delete this.sequencePromiseMap[header.Sequence_Id];
 
             return;
         }
@@ -165,12 +163,40 @@ class CMPPSocket extends events.EventEmitter{
         this.socket.write(buf);
     }
 
+    pushPromise(sequence,deferred){
+        if(!this.sequencePromiseMap[sequence])
+            this.sequencePromiseMap[sequence] = deferred;
+        else if (_.isArray(this.sequencePromiseMap[sequence]))
+            this.sequencePromiseMap[sequence].push(deferred);
+        else
+            this.sequencePromiseMap[sequence]=[this.sequencePromiseMap[sequence],deferred];
+    }
+
+    popPromise(sequence){
+        if(!this.sequencePromiseMap[sequence]) return;
+        if (_.isArray(this.sequencePromiseMap[sequence])){
+            var promise = this.sequencePromiseMap[sequence].shift();
+            if(_.isEmpty(this.sequencePromiseMap[sequence]))
+                delete this.sequencePromiseMap[sequence];
+            return promise;
+        }
+
+        var promise = this.sequencePromiseMap[sequence];
+        delete this.sequencePromiseMap[sequence];
+        return promise;
+    }
+
     send(command:Commands,body?:Body):Promise<any>{
-        var sequence = this.sequenceHolder++;
+        if(body["Pk_number"] === 1){
+            this.sequenceHolder++;
+        }
+
+        var sequence = this.sequenceHolder;
         var buf = this.getBuf({Sequence_Id:sequence,Command_Id:command},body);
         this.socket.write(buf);
         var deferred = Promise.defer();
-        this.sequencePromiseMap[sequence] = deferred;
+        this.pushPromise(sequence, deferred);
+
         var timeout = this.config.timeout;
         if(command === Commands.CMPP_ACTIVE_TEST)
             timeout = this.config.heartbeatTimeout;
