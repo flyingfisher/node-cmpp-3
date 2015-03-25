@@ -145,7 +145,7 @@ class CMPPSocket extends events.EventEmitter{
             }
             clearTimeout(promise._timeoutHandle);
             if(this.hasError(body)){
-                var msg = `command:${Commands[header.Command_Id]} failed. result:${Errors[body.Result]}`;
+                var msg = `command:${Commands[header.Command_Id]} failed. result:${Errors[body.Result] || Status[body.Status]}`;
                 promise.reject(new Error(msg));
             }else{
                 promise.resolve({header:header,body:body});
@@ -428,6 +428,18 @@ enum Errors{
     月消费超额=232,
     未定义=241,
     消息队列满=250
+}
+
+enum Status{
+    消息结构错=1,
+    非法源地址=2,
+    认证错=3,
+    版本太高=4,
+    超过系统接口数=55,
+    超过帐号设置接口数=56,
+    SP登陆IP错误=57,
+    创建soap处理线程失败=58,
+    登陆帐号并非属于登陆的PROXY=60
 }
 
 var CommandsDescription ={
