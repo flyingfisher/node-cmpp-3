@@ -190,8 +190,8 @@ class CMPPSocket extends events.EventEmitter{
         return promise;
     }
 
-    send(command:Commands,body?:Body):Promise<any>{
-        if(body["Pk_number"] === 1){
+    send(command:Commands, body?:Body):Promise<any>{
+        if(body && body["Pk_number"] === 1){
             this.sequenceHolder++;
         }
 
