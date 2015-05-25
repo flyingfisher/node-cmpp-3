@@ -282,7 +282,7 @@ class CMPPSocket extends events.EventEmitter{
     }
 
     getBodyBuffer(command:Commands,body:Body){
-        var buffer = new Buffer(1000);
+        var buffer = new Buffer(1024 * 1024);
         buffer.fill(0);
 
         var commandStr = Commands[command];
