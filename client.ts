@@ -7,10 +7,10 @@ import Socket = require("./cmppSocket");
 import crypto = require('crypto');
 import events = require("events");
 var md5 = crypto.createHash('md5');
+import cmdCfg = require("./commandsConfig");
 
 class Client extends events.EventEmitter {
 	private socket:Socket;
-	private Commands = Socket.Commands;
 	private spId;
 	contentLimit=70;
 	longSmsBufLimit=140;
@@ -29,7 +29,7 @@ class Client extends events.EventEmitter {
 
 		this.spId = spId;
 		return this.socket.connect(this.config.port,this.config.host).then(()=>{
-			return this.socket.send(this.Commands.CMPP_CONNECT,{
+			return this.socket.send(cmdCfg.Commands.CMPP_CONNECT,{
 				Source_Addr:spId,
 				AuthenticatorSource:this.getAuthenticatorSource(spId,secret),
 				Version:0x30, //3.0 version
@@ -77,7 +77,7 @@ class Client extends events.EventEmitter {
 		var buf = new Buffer(content, "gbk");
 		body.Msg_Length=buf.length;
 		body.Msg_Content=buf;
-		return this.socket.send(this.Commands.CMPP_SUBMIT, body);
+		return this.socket.send(cmdCfg.Commands.CMPP_SUBMIT, body);
 	}
 
 	private sendLongSms(body:Body, content):Promise<any>{
@@ -105,7 +105,7 @@ class Client extends events.EventEmitter {
 			body.Pk_number = idx + 1;
 			body.Msg_Content = Buffer.concat([tp_udhiHead_buf, buf.slice(bufSliceCount*idx,bufSliceCount*(idx+1))]);
 			body.Msg_Length = body.Msg_Content["length"];
-			promiseList.push(this.socket.send(this.Commands.CMPP_SUBMIT, body));
+			promiseList.push(this.socket.send(cmdCfg.Commands.CMPP_SUBMIT, body));
 		});
 
 		return Promise.all(promiseList);
