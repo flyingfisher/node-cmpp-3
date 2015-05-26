@@ -106,19 +106,24 @@ class CMPPSocket extends events.EventEmitter{
             this.bufferCache = Buffer.concat([this.bufferCache,buffer]);
         }
 
-        var header = this.readHeader(this.bufferCache);
-        if(this.bufferCache.length < header.Total_Length) return;
-
-        while(this.bufferCache.length >= header.Total_Length) {
-            var buf = this.bufferCache.slice(0, header.Total_Length);
-            this.bufferCache = this.bufferCache.slice(header.Total_Length);
-            this.handleBuffer(buf,header);
-            
-            if(this.bufferCache.length > 12)
-                header = this.readHeader(this.bufferCache);
-        }
+        var obj = {header:undefined,buffer:undefined};
+        while(this.fetchData(obj)){
+            this.handleBuffer(obj.buffer,obj.header);
+        }        
     }
-
+    
+    fetchData(obj){
+        if(!obj) return false;
+        if(this.bufferCache.length<12) return false;
+        
+        obj.header = this.readHeader(this.bufferCache);
+        if(this.bufferCache.length < obj.header.Total_Length) return false;
+        
+        obj.buffer = this.bufferCache.slice(0, obj.header.Total_Length);
+        this.bufferCache = this.bufferCache.slice(obj.header.Total_Length);
+        return true;
+    }
+    
     handleBuffer(buffer,header){
         var body = this.readBody(header.Command_Id, buffer.slice(this.headerLength));
         if(header.Command_Id === cmdCfg.Commands.CMPP_TERMINATE){
