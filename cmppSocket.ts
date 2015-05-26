@@ -113,6 +113,9 @@ class CMPPSocket extends events.EventEmitter{
             var buf = this.bufferCache.slice(0, header.Total_Length);
             this.bufferCache = this.bufferCache.slice(header.Total_Length);
             this.handleBuffer(buf,header);
+            
+            if(this.bufferCache.length > 12)
+                header = this.readHeader(this.bufferCache);
         }
     }
 
