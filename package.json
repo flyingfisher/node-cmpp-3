@@ -1,6 +1,6 @@
 {
   "name": "node-cmpp-3",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "",
   "main": "client.js",
   "scripts": {

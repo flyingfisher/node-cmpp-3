@@ -200,6 +200,13 @@ class CMPPSocket extends events.EventEmitter{
     }
 
     send(command:cmdCfg.Commands, body?:Body):Promise<any>{
+        var deferred = Promise.defer();
+
+        if(_.keys(this.sequencePromiseMap).length > this.config.transationsPerSecond){
+            deferred.reject(new Error(`cmpp exceed max transationsPerSecond[${this.config.transationsPerSecond}], please retry later`));
+            return deferred.promise;
+        }        
+
         if(body && body["Pk_number"] === 1){
             this.sequenceHolder++;
         }
@@ -207,7 +214,6 @@ class CMPPSocket extends events.EventEmitter{
         var sequence = this.sequenceHolder;
         var buf = this.getBuf({Sequence_Id:sequence,Command_Id:command},body);
         this.socket.write(buf);
-        var deferred = Promise.defer();
         this.pushPromise(sequence, deferred);
 
         var timeout = this.config.timeout;
