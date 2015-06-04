@@ -23,6 +23,7 @@ class Client extends events.EventEmitter {
 		_.defaults(config,require("./config"));
 		this.socket = new Socket(config);
 		this.bindEvent();
+		this.clearMobileCount();
 	}
 
 	connect(spId,secret){
@@ -43,7 +44,6 @@ class Client extends events.EventEmitter {
 		this.socket.on("deliver",(rst)=>{
 			var body = <Body>rst.body;
 			if(body.Registered_Delivery === 1){
-				this.sendingMobileCount--;
 				this.emit("deliver", body.Msg_Content["Dest_terminal_Id"], body.Msg_Content["Stat"]);				
 			}
 			else{
@@ -58,6 +58,13 @@ class Client extends events.EventEmitter {
 		this.socket.on("error",(err)=>{
 			this.emit("error", err);
 		});
+	}
+
+	clearMobileCount(){
+		this.sendingMobileCount = 0;
+		setTimeout(()=>{
+			this.clearMobileCount();
+		}, 1100);
 	}
 
 	sendGroup(mobileList:string[],content):Promise<any>{
