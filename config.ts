@@ -9,7 +9,7 @@ var config = {
 	host:"127.0.0.1",
 	serviceId:"serviceName",
 	feeCode:"100",
-	transationsPerSecond: 10,
+	mobilesPerSecond: 200,
 	srcId:"10xxxxxx"
 };
 

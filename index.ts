@@ -10,8 +10,8 @@ client.on("receive",(mobile,content)=>{
     console.log("receive",mobile,content);
 });
 
-client.on("deliver",(msgId,stat)=>{
-    console.log("deliver",msgId,stat);
+client.on("deliver",(mobile ,stat)=>{
+    console.log("deliver",mobile ,stat);
 });
 
 client.on("error",(err)=>{

@@ -19,7 +19,8 @@ Api:
   	host:"127.0.0.1", //default
   	serviceId:"serviceName", //default
   	feeCode:"100", //default
-  	srcId:"10xxxxxx" //default
+  	srcId:"10xxxxxx", //default
+    mobilesPerSecond:200 //default
    });
    
    client.connect("spid","secret").then(()=>{

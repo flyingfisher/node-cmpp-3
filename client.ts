@@ -14,6 +14,7 @@ class Client extends events.EventEmitter {
 	private spId;
 	contentLimit=70;
 	longSmsBufLimit=140;
+	private sendingMobileCount = 0;
 
 	public deliverConst = ReportStat;
 
@@ -42,7 +43,8 @@ class Client extends events.EventEmitter {
 		this.socket.on("deliver",(rst)=>{
 			var body = <Body>rst.body;
 			if(body.Registered_Delivery === 1){
-				this.emit("deliver",body.Msg_Content["Msg_Id"],body.Msg_Content["Stat"]);
+				this.sendingMobileCount--;
+				this.emit("deliver", body.Msg_Content["Dest_terminal_Id"], body.Msg_Content["Stat"]);				
 			}
 			else{
 				this.emit("receive", body.Src_terminal_Id, body.Msg_Content);
@@ -59,7 +61,13 @@ class Client extends events.EventEmitter {
 	}
 
 	sendGroup(mobileList:string[],content):Promise<any>{
-		if(!this.socket.isReady) return Promise.reject(new Error("socket is not Ready"));
+		if (!this.socket.isReady) return Promise.reject(new Error("socket is not Ready"));
+		if ((this.sendingMobileCount + mobileList.length) > this.config.mobilesPerSecond){
+			return Promise.reject(new Error(`cmpp exceed max mobilesPerSecond[${this.config.mobilesPerSecond}], please retry later`));
+		}
+		
+		this.sendingMobileCount += mobileList.length;
+		
 		var body = this.buildSubmitBody();
 		var destBuffer = new Buffer(mobileList.length * 32);
 		destBuffer.fill(0);
