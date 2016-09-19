@@ -4,9 +4,7 @@
 
 require("./global");
 import Socket = require("./cmppSocket");
-import crypto = require('crypto');
 import events = require("events");
-var md5 = crypto.createHash('md5');
 import cmdCfg = require("./commandsConfig");
 
 class Client extends events.EventEmitter {
@@ -170,8 +168,7 @@ class Client extends events.EventEmitter {
 		buffer.write(spId,0,6,"ascii");
 		buffer.write(secret,15,21,"ascii");
 		buffer.write(this.getTimestamp(),21,10,"ascii");
-		md5.update(buffer);
-		return md5.digest();
+		return require('crypto').createHash('md5').update(buffer).digest();
 	}
 
 	getTimestamp(){
